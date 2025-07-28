@@ -1,5 +1,6 @@
 package com.example.bankcards.service;
 
+import com.example.bankcards.dto.TransferRequest;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.exception.InactiveCardException;
 import lombok.RequiredArgsConstructor;
@@ -15,18 +16,18 @@ public class TransferService {
     private final CardService cardService;
 
     @Transactional
-    public void transferAmount(Long fromCardId, Long toCardId, BigDecimal amount) {
-        Card fromCard = cardService.findById(fromCardId)
+    public void transferAmount(TransferRequest request) {
+        Card fromCard = cardService.findById(request.getFromCardId())
                 .orElseThrow(() -> new IllegalArgumentException("Sender card not found"));
 
-        Card toCard = cardService.findById(toCardId)
+        Card toCard = cardService.findById(request.getToCardId())
                 .orElseThrow(() -> new IllegalArgumentException("Receiver card not found"));
 
         validateCardIsActive(fromCard);
         validateCardIsActive(toCard);
 
-        fromCard.withdraw(amount);
-        toCard.deposit(amount);
+        fromCard.withdraw(request.getAmount());
+        toCard.deposit(request.getAmount());
 
     }
 

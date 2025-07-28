@@ -1,8 +1,8 @@
 package com.example.bankcards.entity;
 
+import com.example.bankcards.util.EncryptionUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +11,6 @@ import java.time.LocalDate;
 
 @Entity
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Card {
@@ -20,7 +19,8 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String number;
+    @Column(nullable = false)
+    private String encryptedNumber;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -28,6 +28,7 @@ public class Card {
 
     private LocalDate expiredDate;
 
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     private BigDecimal balance;
@@ -49,5 +50,15 @@ public class Card {
 
     public void deposit(BigDecimal amount) {
         balance = balance.add(amount);
+    }
+
+    public void setEncryptedNumber(String number) {
+        this.encryptedNumber = EncryptionUtil.encrypt(number);
+    }
+
+    @Transient
+    public String getEncryptedNumber() {
+        String number = EncryptionUtil.decrypt(encryptedNumber);
+        return "**** **** **** " + number.substring(number.length() - 4);
     }
 }

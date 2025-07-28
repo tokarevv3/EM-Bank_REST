@@ -6,6 +6,7 @@ import com.example.bankcards.service.CardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/cards")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
+
 public class CardController {
 
     private final CardService cardService;
@@ -22,10 +25,17 @@ public class CardController {
         return ResponseEntity.ok(cardService.findAll());
     }
 
-    @PutMapping
+    @GetMapping("/{id}")
+    public ResponseEntity<Card> getCard(@PathVariable Long id) {
+        return cardService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Card createCard(@RequestParam Long userId) {
-        return cardService.createCard(userId);
+    public Card createCard(@PathVariable Long id) {
+        return cardService.createCard(id);
     }
 
     @PatchMapping("/{id}")

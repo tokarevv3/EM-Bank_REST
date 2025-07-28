@@ -1,9 +1,11 @@
 package com.example.bankcards.service;
 
 import com.example.bankcards.dto.UserCreateDto;
+import com.example.bankcards.entity.Role;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<User> findAll() {
         return userRepository.findAll();
@@ -28,7 +31,19 @@ public class UserService {
     }
 
     public User createUser(UserCreateDto dto) {
-        return null;
+        var user = new User();
+        user.setLogin(dto.getLogin());
+        if (dto.getRole() == null) {
+            user.setRole(Role.USER);
+        } else {
+            user.setRole(dto.getRole());
+        }
+
+        Optional.ofNullable(dto.getPassword())
+                .map(passwordEncoder::encode)
+                .ifPresent(user::setPassword);
+
+        return userRepository.saveAndFlush(user);
     }
 
     public boolean deleteUser(Long id) {

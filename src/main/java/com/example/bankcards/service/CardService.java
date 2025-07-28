@@ -1,12 +1,17 @@
 package com.example.bankcards.service;
 
-import com.example.bankcards.dto.CardCreateDto;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.Status;
+import com.example.bankcards.entity.User;
 import com.example.bankcards.repository.CardRepository;
+import com.example.bankcards.util.CardNumberGenerator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,17 +20,30 @@ import java.util.Optional;
 public class CardService {
 
     private final CardRepository cardRepository;
+    private final UserService userService;
+    private final CardNumberGenerator cardNumberGenerator;
 
+    @Transactional
     public Card createCard(Long userId) {
-        return null;
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));
+
+        Card card = new Card();
+        card.setOwner(user);
+        card.setEncryptedNumber(cardNumberGenerator.generateCardNumber());
+        card.setBalance(BigDecimal.ZERO);
+        card.setStatus(Status.ACTIVE);
+        card.setExpiredDate(LocalDate.now().plusYears(5));
+
+        return cardRepository.save(card);
     }
 
     public Optional<Card> findById(Long id) {
         return cardRepository.findById(id);
     }
 
-    public List<Card> findByUserId(Long id) {
-        return cardRepository.findAllByOwner();
+    public List<Card> findByUser(User user) {
+        return cardRepository.findAllByOwner(user);
     }
 
     public List<Card> findAll() {
@@ -42,6 +60,7 @@ public class CardService {
                 .orElse(false);
     }
 
+    @Deprecated
     public boolean blockCard(Long id) {
         return cardRepository.findById(id)
                 .map(entity -> {
@@ -52,6 +71,7 @@ public class CardService {
                 .orElse(false);
     }
 
+    @Deprecated
     public boolean activeCard(Long id) {
         return cardRepository.findById(id)
                 .map(entity -> {

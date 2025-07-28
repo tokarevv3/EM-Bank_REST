@@ -1,6 +1,5 @@
 package com.example.bankcards.security;
 
-import com.example.bankcards.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
