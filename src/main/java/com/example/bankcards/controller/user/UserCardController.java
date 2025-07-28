@@ -1,15 +1,17 @@
 package com.example.bankcards.controller.user;
 
-import com.example.bankcards.dto.TransferRequest;
-import com.example.bankcards.entity.Card;
+import com.example.bankcards.dto.CardReadDto;
+import com.example.bankcards.dto.request.TransferRequest;
 import com.example.bankcards.entity.Status;
 import com.example.bankcards.security.CardOwnershipValidator;
 import com.example.bankcards.service.AuthService;
 import com.example.bankcards.service.CardService;
 import com.example.bankcards.service.TransferService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@Validated
 public class UserCardController {
 
     private final CardService cardService;
@@ -29,7 +32,7 @@ public class UserCardController {
 
     //TODO:: PAGE AND FILTER
     @GetMapping("/cards")
-    public List<Card> findUserCards() {
+    public List<CardReadDto> findUserCards() {
 
         var currentUser = authService.getAuthenticatedUser();
 
@@ -37,13 +40,13 @@ public class UserCardController {
     }
 
     @PatchMapping("/cards/{id}")
-    public boolean blockCard(@PathVariable Long id) throws IllegalAccessException {
+    public boolean blockCard(@PathVariable @Positive(message = "ID должен быть положительным") Long id) throws IllegalAccessException {
         cardOwnershipValidator.validateOwnership(id);
         return cardService.updateCardStatus(id, Status.BLOCKED);
     }
 
     @GetMapping("/cards/{id}/balance")
-    public BigDecimal getCardBalance(@PathVariable Long id) {
+    public BigDecimal getCardBalance(@PathVariable @Positive(message = "ID должен быть положительным") Long id) {
         cardOwnershipValidator.validateOwnership(id);
         return cardService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Card not found"))

@@ -1,6 +1,6 @@
 package com.example.bankcards.controller;
 
-import com.example.bankcards.dto.LoginRequest;
+import com.example.bankcards.dto.request.LoginRequest;
 import com.example.bankcards.dto.UserCreateDto;
 import com.example.bankcards.service.AuthService;
 import com.example.bankcards.service.RegisterService;
@@ -21,7 +21,7 @@ public class LoginController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserCreateDto newUser)  {
 
-        var registeredUser = registerService.registerUser(newUser);
+        registerService.registerUser(newUser);
         var jwtResponse = authService.authenticateUser(newUser.getLogin(), newUser.getPassword());
 
         return ResponseEntity.ok(jwtResponse);
@@ -29,7 +29,7 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
         var jwtResponse = authService.authenticateUser(loginRequest.getLogin(), loginRequest.getPassword());
 
         return ResponseEntity.ok(jwtResponse);

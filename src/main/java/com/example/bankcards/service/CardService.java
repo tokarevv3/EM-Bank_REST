@@ -1,10 +1,12 @@
 package com.example.bankcards.service;
 
+import com.example.bankcards.dto.CardReadDto;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.Status;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.util.CardNumberGenerator;
+import com.example.bankcards.util.mapper.CardReadMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,10 +24,11 @@ public class CardService {
     private final CardRepository cardRepository;
     private final UserService userService;
     private final CardNumberGenerator cardNumberGenerator;
+    private final CardReadMapper cardReadMapper;
 
     @Transactional
-    public Card createCard(Long userId) {
-        User user = userService.findById(userId)
+    public CardReadDto createCard(Long userId) {
+        User user = userService.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));
 
         Card card = new Card();
@@ -35,21 +38,36 @@ public class CardService {
         card.setStatus(Status.ACTIVE);
         card.setExpiredDate(LocalDate.now().plusYears(5));
 
-        return cardRepository.save(card);
+        user.getCardList().add(card);
+        userService.save(user);
+
+        return Optional.of(cardRepository.save(card))
+                .map(cardReadMapper::map)
+                .orElseThrow();
     }
 
-    public Optional<Card> findById(Long id) {
+    public Optional<CardReadDto> findById(Long id) {
+        return cardRepository.findById(id)
+                .map(cardReadMapper::map);
+    }
+
+    public Optional<Card> getById(Long id) {
         return cardRepository.findById(id);
     }
 
-    public List<Card> findByUser(User user) {
-        return cardRepository.findAllByOwner(user);
+    public List<CardReadDto> findByUser(User user) {
+        return cardRepository.findAllByOwner(user).stream()
+                .map(cardReadMapper::map)
+                .toList();
     }
 
-    public List<Card> findAll() {
-        return cardRepository.findAll();
+    public List<CardReadDto> findAll() {
+        return cardRepository.findAll().stream()
+                .map(cardReadMapper::map)
+                .toList();
     }
 
+    @Transactional
     public boolean deleteCard(Long id) {
         return cardRepository.findById(id)
                 .map(entity -> {
@@ -61,6 +79,7 @@ public class CardService {
     }
 
     @Deprecated
+    @Transactional
     public boolean blockCard(Long id) {
         return cardRepository.findById(id)
                 .map(entity -> {
@@ -72,6 +91,7 @@ public class CardService {
     }
 
     @Deprecated
+    @Transactional
     public boolean activeCard(Long id) {
         return cardRepository.findById(id)
                 .map(entity -> {
@@ -82,6 +102,7 @@ public class CardService {
                 .orElse(false);
     }
 
+    @Transactional
     public boolean updateCardStatus(Long id, Status newStatus) throws IllegalAccessException {
 
         if (newStatus == Status.EXPIRED) {

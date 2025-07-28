@@ -1,13 +1,11 @@
 package com.example.bankcards.service;
 
-import com.example.bankcards.dto.TransferRequest;
+import com.example.bankcards.dto.request.TransferRequest;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.exception.InactiveCardException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +15,10 @@ public class TransferService {
 
     @Transactional
     public void transferAmount(TransferRequest request) {
-        Card fromCard = cardService.findById(request.getFromCardId())
+        Card fromCard = cardService.getById(request.getFromCardId())
                 .orElseThrow(() -> new IllegalArgumentException("Sender card not found"));
 
-        Card toCard = cardService.findById(request.getToCardId())
+        Card toCard = cardService.getById(request.getToCardId())
                 .orElseThrow(() -> new IllegalArgumentException("Receiver card not found"));
 
         validateCardIsActive(fromCard);

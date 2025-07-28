@@ -1,6 +1,5 @@
 package com.example.bankcards.security;
 
-import com.example.bankcards.entity.Card;
 import com.example.bankcards.exception.CardNotFoundException;
 import com.example.bankcards.service.AuthService;
 import com.example.bankcards.service.CardService;
@@ -16,7 +15,7 @@ public class CardOwnershipValidator {
     private final AuthService authService;
 
     public void validateOwnership(Long cardId) {
-        Card card = cardService.findById(cardId)
+        var card = cardService.getById(cardId)
                 .orElseThrow(() -> new CardNotFoundException("Card with ID " + cardId + "not found."));
         String currentUserLogin = authService.getAuthenticatedUser().getLogin();
 
