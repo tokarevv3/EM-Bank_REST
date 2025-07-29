@@ -1,13 +1,11 @@
-#
-# application.yml — главный конфигурационный файл Spring Boot.
 server:
   port: 8080
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/bank
-    username: postgres
-    password: root
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/bank}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -19,33 +17,28 @@ spring:
   jackson:
     serialization:
       INDENT_OUTPUT: true
-
   liquibase:
     change-log: classpath:db/migration/001-create-tables-and-admin.yaml
     enabled: true
 
-  security:
-    allow-unauthenticated-paths:
-      - /api/auth/**
-      - /swagger-ui/**
-      - /v3/api-docs/**
-      - /swagger-resources/**
-      - /webjars/**
-
-jwt:
-  secret: your-jwt-secret-key
-  expiration: 3600000  # 1 час в миллисекундах
-  issuer: your-app-name
-
 springdoc:
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    url: /v3/api-docs
+    enabled: true
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: debug
+
+custom:
+  jwt:
+    secret: ${CUSTOM_JWT_SECRET:secret}
+    expiration: ${CUSTOM_JWT_EXPIRATION:86400000}
+  encryption:
+    algorithm: ${CUSTOM_ENCRYPTION_ALGORITHM:AES}
+    secret: ${CUSTOM_ENCRYPTION_SECRET:1234567890123456}
 
 

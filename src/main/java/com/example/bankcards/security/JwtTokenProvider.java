@@ -3,6 +3,7 @@ package com.example.bankcards.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +13,10 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    private final String JWT_SECRET = "secret";
-    private final long JWT_EXPIRATION_MS = 86400000; // 1 день
+    @Value("${custom.jwt.secret}")
+    private String JWT_SECRET;
+    @Value("${custom.jwt.expiration}")
+    private long JWT_EXPIRATION_MS;
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();

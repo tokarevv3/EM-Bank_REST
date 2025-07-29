@@ -1,7 +1,7 @@
-package com.example.bankcards.exception.validation.validator;
+package com.example.bankcards.util.validation.validator;
 
 import com.example.bankcards.entity.Role;
-import com.example.bankcards.exception.validation.annotation.EnumValue;
+import com.example.bankcards.util.validation.annotation.EnumValue;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

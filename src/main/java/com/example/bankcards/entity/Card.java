@@ -1,6 +1,5 @@
 package com.example.bankcards.entity;
 
-import com.example.bankcards.util.EncryptionUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -52,15 +51,5 @@ public class Card {
 
     public void deposit(BigDecimal amount) {
         balance = balance.add(amount);
-    }
-
-    public void setEncryptedNumber(String number) {
-        this.encryptedNumber = EncryptionUtil.encrypt(number);
-    }
-
-    @Transient
-    public String getEncryptedNumber() {
-        String number = EncryptionUtil.decrypt(encryptedNumber);
-        return "**** **** **** " + number.substring(number.length() - 4);
     }
 }

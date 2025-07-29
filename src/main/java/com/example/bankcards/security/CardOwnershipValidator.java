@@ -2,7 +2,9 @@ package com.example.bankcards.security;
 
 import com.example.bankcards.exception.CardNotFoundException;
 import com.example.bankcards.service.AuthService;
+import com.example.bankcards.service.AuthServiceImpl;
 import com.example.bankcards.service.CardService;
+import com.example.bankcards.service.CardServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;

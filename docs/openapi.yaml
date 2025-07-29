@@ -1,1 +1,473 @@
-# Здесь будет OpenAPI описание всех доступных эндпоинтов и моделей данных.
+openapi: 3.0.1
+info:
+  title: Admin Panel API
+  version: 1.0.0
+  description: API для управления пользователями и картами. Доступно только администратору.
+servers:
+- url: http://localhost:8080/api
+tags:
+- name: Users
+  description: Управление пользователями
+- name: Cards
+  description: Управление картами
+paths:
+  /admin/users:
+    get:
+      tags:
+      - Users
+      summary: Получить всех пользователей
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserReadDto'
+    post:
+      tags:
+      - Users
+      summary: Создать нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateDto'
+      responses:
+        '201':
+          description: Пользователь создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserReadDto'
+        '400':
+          description: Ошибка валидации
+  /admin/users/{id}:
+    get:
+      tags:
+      - Users
+      summary: Получить пользователя по ID
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: Пользователь найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserReadDto'
+        '404':
+          description: Не найден
+    delete:
+      tags:
+      - Users
+      summary: Удалить пользователя
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '204':
+          description: Успешно удалён
+        '404':
+          description: Пользователь не найден
+  /admin/cards:
+    get:
+      tags:
+      - Cards
+      summary: Получить все карты
+      responses:
+        '200':
+          description: Список карт
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardReadDto'
+  /admin/cards/{id}:
+    get:
+      tags:
+      - Cards
+      summary: Получить карту по ID
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: Карта найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardReadDto'
+        '404':
+          description: Не найдена
+    post:
+      tags:
+      - Cards
+      summary: Создать карту для пользователя по ID
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '201':
+          description: Карта создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardReadDto'
+    patch:
+      tags:
+      - Cards
+      summary: Обновить статус карты
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardStatusUpdateRequest'
+      responses:
+        '200':
+          description: Статус обновлён
+        '400':
+          description: Неверный статус
+        '404':
+          description: Карта не найдена
+    delete:
+      tags:
+      - Cards
+      summary: Удалить карту
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '204':
+          description: Успешно удалена
+        '404':
+          description: Не найдена
+  /user/transfer:
+    post:
+      tags:
+      - Transfer
+      summary: Перевод денег между картами
+      description: Перевод указанной суммы с одной карты на другую. Требуется авторизация.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '204':
+          description: Перевод выполнен успешно
+        '400':
+          description: Ошибка валидации или отсутствие прав на карту
+        '401':
+          description: Неавторизованный пользователь
+        '403':
+          description: Нет доступа
+        '500':
+          description: Внутренняя ошибка сервера
+      security:
+      - bearerAuth: []
+  /user/cards:
+    get:
+      tags:
+      - Cards
+      summary: Получить список карт текущего пользователя
+      description: Возвращает постраничный список всех карт, принадлежащих авторизованному
+        пользователю. Можно фильтровать по статусу.
+      parameters:
+      - name: page
+        in: query
+        description: Номер страницы (начиная с 0)
+        required: false
+        schema:
+          type: integer
+          default: 0
+      - name: size
+        in: query
+        description: Размер страницы (кол-во элементов на страницу)
+        required: false
+        schema:
+          type: integer
+          default: 10
+      - name: status
+        in: query
+        description: Фильтрация по статусу карты (например, ACTIVE или BLOCKED)
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Список карт с пагинацией
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CardReadDto'
+                  totalElements:
+                    type: integer
+                    description: Общее количество элементов
+                  totalPages:
+                    type: integer
+                    description: Общее количество страниц
+                  number:
+                    type: integer
+                    description: Номер текущей страницы
+                  size:
+                    type: integer
+                    description: Размер страницы
+                  first:
+                    type: boolean
+                  last:
+                    type: boolean
+        '401':
+          description: Неавторизованный пользователь
+      security:
+      - bearerAuth: []
+  /user/cards/{id}:
+    patch:
+      tags:
+      - Cards
+      summary: Заблокировать карту
+      description: Обновляет статус карты на BLOCKED. Только для владельца карты.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID карты
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: Карта успешно заблокирована
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        '400':
+          description: Неверный ID
+        '403':
+          description: Нет доступа к карте
+        '404':
+          description: Карта не найдена
+        '401':
+          description: Неавторизованный пользователь
+      security:
+      - bearerAuth: []
+  /user/cards/{id}/balance:
+    get:
+      tags:
+      - Cards
+      summary: Получить баланс карты
+      description: Возвращает баланс по ID карты текущего пользователя.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID карты
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: Баланс карты
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+                example: 1023.45
+        '403':
+          description: Нет доступа к карте
+        '404':
+          description: Карта не найдена
+        '401':
+          description: Неавторизованный пользователь
+      security:
+      - bearerAuth: []
+  /auth/register:
+    post:
+      summary: Регистрация нового пользователя
+      tags:
+      - Аутентификация
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateDto'
+      responses:
+        '200':
+          description: Пользователь успешно зарегистрирован и аутентифицирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        '400':
+          description: Ошибка валидации или регистрации
+  /auth/login:
+    post:
+      summary: Аутентификация пользователя
+      tags:
+      - Аутентификация
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        '401':
+          description: Неверный логин или пароль
+components:
+  schemas:
+    UserReadDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        login:
+          type: string
+        role:
+          type: string
+          enum:
+          - ADMIN
+          - USER
+    CardReadDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        maskedNumber:
+          type: string
+          description: Маскированный номер карты
+          example: '**** **** **** 1234'
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - BLOCKED
+          - EXPIRED
+        balance:
+          type: number
+          format: double
+          example: 1000.0
+    CardStatusUpdateRequest:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - BLOCKED
+    TransferRequest:
+      type: object
+      required:
+      - fromCardId
+      - toCardId
+      - amount
+      properties:
+        fromCardId:
+          type: integer
+          description: ID карты-отправителя
+          example: 1
+        toCardId:
+          type: integer
+          description: ID карты-получателя
+          example: 2
+        amount:
+          type: number
+          format: BigDecimal
+          minimum: 0.01
+          description: Сумма перевода
+          example: 1000.5
+    LoginRequest:
+      type: object
+      required:
+      - login
+      - password
+      properties:
+        login:
+          type: string
+          example: user123
+        password:
+          type: string
+          format: password
+          example: securePass123
+    JwtResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT токен доступа
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type:
+          type: string
+          description: Тип токена (обычно "Bearer")
+          example: Bearer
+    UserCreateDto:
+      type: object
+      required:
+      - login
+      - password
+      - role
+      properties:
+        login:
+          type: string
+          example: admin123
+        password:
+          type: string
+          format: password
+          example: adminPass!
+        role:
+          type: string
+          enum:
+          - ADMIN
+          - USER
+          example: USER

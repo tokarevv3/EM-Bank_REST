@@ -1,6 +1,6 @@
-package com.example.bankcards.exception.validation.annotation;
+package com.example.bankcards.util.validation.annotation;
 
-import com.example.bankcards.exception.validation.validator.AllowedStatusValidator;
+import com.example.bankcards.util.validation.validator.AllowedStatusValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.*;

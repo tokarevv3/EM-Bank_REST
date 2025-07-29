@@ -1,8 +1,10 @@
-package com.example.bankcards.exception.validation.handler;
+package com.example.bankcards.util.validation.handler;
 
+import com.example.bankcards.exception.OwnershipException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -49,8 +51,12 @@ public class GlobalExceptionHandler {
             }
         }
 
-        // Обработка других случаев
         return ResponseEntity.badRequest().body(Map.of("message", "Неверный формат JSON"));
 
+    }
+
+    @ExceptionHandler(OwnershipException.class)
+    public ResponseEntity<String> handleOwnershipException(OwnershipException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 }

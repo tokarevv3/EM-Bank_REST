@@ -1,7 +1,7 @@
-package com.example.bankcards.exception.validation.validator;
+package com.example.bankcards.util.validation.validator;
 
 import com.example.bankcards.entity.Status;
-import com.example.bankcards.exception.validation.annotation.AllowedStatus;
+import com.example.bankcards.util.validation.annotation.AllowedStatus;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.Set;

@@ -1,8 +1,9 @@
 package com.example.bankcards.dto;
 
 import com.example.bankcards.entity.Role;
-import com.example.bankcards.exception.validation.annotation.EnumValue;
+import com.example.bankcards.util.validation.annotation.EnumValue;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Setter;
 import lombok.Value;
 
 @Value
